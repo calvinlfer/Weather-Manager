@@ -9,6 +9,8 @@ scalacOptions ++= Seq(
   "-Ywarn-unused-import"
 )
 
+resolvers += Resolver.bintrayRepo("lightshed", "maven")
+
 libraryDependencies ++= {
   val akka = "com.typesafe.akka"
   val akkaV = "2.5.0"
@@ -27,6 +29,8 @@ libraryDependencies ++= {
     "ch.megard"                           %% "akka-http-cors"     % "0.2.1",
     "org.scalatest"                       %% "scalatest"          % "3.0.1"   % "test",
     "com.gu"                              %% "scanamo"            % "0.9.2",
-    "com.github.t3hnar"                   %% "scala-bcrypt"       % "3.0"
+    "com.github.t3hnar"                   %% "scala-bcrypt"       % "3.0",
+    "ch.lightshed"                        %% "courier"            % "0.1.4",
+    "org.jvnet.mock-javamail"              % "mock-javamail"      % "1.9"     % "test"
   )
 }
