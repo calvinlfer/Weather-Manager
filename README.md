@@ -15,3 +15,111 @@ send out emails to users.
 #### Application
 The application uses Akka HTTP and DynamoDB are the backing store. It also interacts with OpenWeather in order to source
 weather information. 
+
+### Table Creation
+
+If you are using local DynamoDB, hop on to the shell 
+(eg. if Local DynamoDB runs on port 8000, visit http://localhost:8000/shell) and execute the following commands to 
+configure the tables:
+
+Table to store forecast data
+```javascript
+var params = {
+    TableName: 'forecast',
+    KeySchema: [ // The type of of schema.  Must start with a HASH type, with an optional second RANGE.
+        { // Required HASH type attribute
+            AttributeName: 'username',
+            KeyType: 'HASH',
+        },
+        { // Optional RANGE key type for HASH + RANGE tables
+            AttributeName: 'id', 
+            KeyType: 'RANGE', 
+        }
+    ],
+    AttributeDefinitions: [ // The names and types of all primary and index key attributes only
+        {
+            AttributeName: 'username',
+            AttributeType: 'S', // (S | N | B) for string, number, binary
+        },
+        {
+            AttributeName: 'id',
+            AttributeType: 'N', // (S | N | B) for string, number, binary
+        }
+    ],
+    ProvisionedThroughput: { // required provisioned throughput for the table
+        ReadCapacityUnits: 1, 
+        WriteCapacityUnits: 1, 
+    }
+};
+dynamodb.createTable(params, function(err, data) {
+    if (err) ppJson(err); // an error occurred
+    else ppJson(data); // successful response
+});
+```
+
+Table to store member data
+```javascript
+var params = {
+    TableName: 'forecast-members',
+    KeySchema: [ // The type of of schema.  Must start with a HASH type, with an optional second RANGE.
+        { // Required HASH type attribute
+            AttributeName: 'email',
+            KeyType: 'HASH',
+        }
+    ],
+    AttributeDefinitions: [ // The names and types of all primary and index key attributes only
+        {
+            AttributeName: 'email',
+            AttributeType: 'S', // (S | N | B) for string, number, binary
+        }
+    ],
+    ProvisionedThroughput: { // required provisioned throughput for the table
+        ReadCapacityUnits: 1, 
+        WriteCapacityUnits: 1, 
+    }
+};
+dynamodb.createTable(params, function(err, data) {
+    if (err) ppJson(err); // an error occurred
+    else ppJson(data); // successful response
+});
+```
+
+Table to store password reset data
+```javascript
+var params = {
+    TableName: 'forecast-password-reset',
+    KeySchema: [ // The type of of schema.  Must start with a HASH type, with an optional second RANGE.
+        { // Required HASH type attribute
+            AttributeName: 'resetCode',
+            KeyType: 'HASH',
+        }
+    ],
+    AttributeDefinitions: [ // The names and types of all primary and index key attributes only
+        {
+            AttributeName: 'resetCode',
+            AttributeType: 'S', // (S | N | B) for string, number, binary
+        }
+    ],
+    ProvisionedThroughput: { // required provisioned throughput for the table
+        ReadCapacityUnits: 1, 
+        WriteCapacityUnits: 1, 
+    }
+};
+dynamodb.createTable(params, function(err, data) {
+    if (err) ppJson(err); // an error occurred
+    else ppJson(data); // successful response
+});
+```
+
+## Running the application
+The easiest way to run the application is using `sbt run`, if you want to run this against local DynamoDB then run:
+
+```sbt 
+-Dsecrets.jwt-key=examplesecretgoes here 
+-Ddynamodb.aws-access-key-id=dev 
+-Ddynamodb.aws-secret-access-key=dev 
+-Ddynamodb.endpoint=http://localhost:8000 
+-Demail.sender-email=youremail@gmail.com
+-Demail.password=yourpassword
+-Dopenweather.api-key=youropenweatherapikey
+run```
