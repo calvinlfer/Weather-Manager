@@ -14,7 +14,8 @@ send out emails to users.
 
 #### Application
 The application uses Akka HTTP to serve HTTP requests and DynamoDB as the backing store. It also interacts with 
-OpenWeather in order to source weather information. 
+OpenWeather in order to source weather information. ScalaCache + Caffeine is also used to cache OpenWeather queries for
+30 minutes to minimize latency and bandwidth.
 
 It uses 3 DynamoDB tables: 
 - Member: responsible for member authentication (passwords are bcrypted and then stored)
