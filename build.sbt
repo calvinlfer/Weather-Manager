@@ -9,6 +9,8 @@ scalacOptions ++= Seq(
   "-Ywarn-unused-import"
 )
 
+enablePlugins(JavaAppPackaging)
+
 resolvers += Resolver.bintrayRepo("lightshed", "maven")
 
 libraryDependencies ++= {
@@ -20,6 +22,7 @@ libraryDependencies ++= {
 
   Seq(
     akka                                  %% "akka-actor"           % akkaV,
+    akka                                  %% "akka-slf4j"           % akkaV,
     akka                                  %% "akka-http"            % akkaHttpV,
     akka                                  %% "akka-http-testkit"    % akkaHttpV,
     circe                                 %% "circe-parser"         % circeV,
@@ -33,6 +36,8 @@ libraryDependencies ++= {
     "com.pauldijou"                       %% "jwt-circe"            % "0.12.1",
     "ch.lightshed"                        %% "courier"              % "0.1.4",
     "com.github.cb372"                    %% "scalacache-caffeine"  % "0.9.3",
-    "org.jvnet.mock-javamail"              % "mock-javamail"        % "1.9"     % "test"
+    "org.jvnet.mock-javamail"              % "mock-javamail"        % "1.9"     % "test",
+    "ch.qos.logback"                       % "logback-classic"      % "1.2.3",
+    "org.codehaus.groovy"                  % "groovy"               % "2.4.10"
   )
 }

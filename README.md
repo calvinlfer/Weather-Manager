@@ -123,3 +123,10 @@ The easiest way to run the application is using `sbt run`, if you want to run th
 ```sbtshell
 sbt -Dsecrets.jwt-key=examplesecretgoes here -Ddynamodb.aws-access-key-id=dev -Ddynamodb.aws-secret-access-key=dev -Ddynamodb.endpoint=http://localhost:8000 -Demail.sender-email=youremail@gmail.com -Demail.password=yourpassword -Dopenweather.api-key=youropenweatherapikey run
 ```
+
+You can also use the universal packager which is more geared for production deployment
+```sbtshell
+sbt clean universal:packageBin 
+```
+
+Navigate to `target/universal` and unzip `weather-manager-1.0.zip` and execute `./bin/weather-manager`
