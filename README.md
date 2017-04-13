@@ -13,8 +13,13 @@ Reset code via email is made possible by Courier. We rely on an existing SMTP co
 send out emails to users.
 
 #### Application
-The application uses Akka HTTP and DynamoDB are the backing store. It also interacts with OpenWeather in order to source
-weather information. 
+The application uses Akka HTTP to serve HTTP requests and DynamoDB as the backing store. It also interacts with 
+OpenWeather in order to source weather information. 
+
+It uses 3 DynamoDB tables: 
+- Member: responsible for member authentication (passwords are bcrypted and then stored)
+- Forecast: OpenWeather forecast weather ID data is stored for each user
+- Password Reset: Table that is used to facilitate password reset functionality
 
 ### Table Creation
 
