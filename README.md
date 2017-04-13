@@ -114,12 +114,6 @@ dynamodb.createTable(params, function(err, data) {
 ## Running the application
 The easiest way to run the application is using `sbt run`, if you want to run this against local DynamoDB then run:
 
-```sbt 
--Dsecrets.jwt-key=examplesecretgoes here 
--Ddynamodb.aws-access-key-id=dev 
--Ddynamodb.aws-secret-access-key=dev 
--Ddynamodb.endpoint=http://localhost:8000 
--Demail.sender-email=youremail@gmail.com
--Demail.password=yourpassword
--Dopenweather.api-key=youropenweatherapikey
-run```
+```sbtshell
+sbt -Dsecrets.jwt-key=examplesecretgoes here -Ddynamodb.aws-access-key-id=dev -Ddynamodb.aws-secret-access-key=dev -Ddynamodb.endpoint=http://localhost:8000 -Demail.sender-email=youremail@gmail.com -Demail.password=yourpassword -Dopenweather.api-key=youropenweatherapikey run
+```
