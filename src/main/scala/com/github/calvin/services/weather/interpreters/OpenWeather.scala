@@ -16,7 +16,13 @@ import scalacache.caffeine.CaffeineCache
 import scalacache._
 import memoization._
 
-
+/**
+  * OpenWeather implementation of Weather
+  * @param httpClient Akka HTTP client
+  * @param apiKey OpenWeather API key
+  * @param mat Akka Streams Materializer
+  * @param ec Execution Context needed to run Futures
+  */
 class OpenWeather(httpClient: HttpExt, apiKey: String)(implicit mat: ActorMaterializer, ec: ExecutionContext)
   extends Weather with FailFastCirceSupport {
   implicit val scalaCache = ScalaCache(CaffeineCache())
