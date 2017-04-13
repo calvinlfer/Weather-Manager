@@ -10,22 +10,31 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import io.circe.generic.auto._
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
+import scala.language.postfixOps
+import scalacache.caffeine.CaffeineCache
+import scalacache._
+import memoization._
+
 
 class OpenWeather(httpClient: HttpExt, apiKey: String)(implicit mat: ActorMaterializer, ec: ExecutionContext)
   extends Weather with FailFastCirceSupport {
+  implicit val scalaCache = ScalaCache(CaffeineCache())
 
-  override def getCurrentWeather(lat: Double, lng: Double): Future[CurrentWeatherData] =
+  override def getCurrentWeather(lat: Double, lng: Double): Future[CurrentWeatherData] = memoize(30 minutes) {
     httpClient
       .singleRequest(HttpRequest(
         method = GET,
         uri = s"http://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lng&APPID=$apiKey&units=metric"))
       .flatMap(httpResponse => Unmarshal(httpResponse).to[CurrentWeatherData])
+  }
 
-  override def getCurrentWeather(id: Long): Future[CurrentWeatherData] =
+  override def getCurrentWeather(id: Long): Future[CurrentWeatherData] = memoize(30 minutes) {
     httpClient
       .singleRequest(HttpRequest(
         method = GET, uri = s"http://api.openweathermap.org/data/2.5/weather?id=$id&APPID=$apiKey&units=metric"))
       .flatMap(httpResponse => Unmarshal(httpResponse).to[CurrentWeatherData])
+  }
 }
 
 object OpenWeather {
