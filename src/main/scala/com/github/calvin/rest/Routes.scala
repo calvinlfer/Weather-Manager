@@ -8,10 +8,11 @@ import akka.http.scaladsl.server.{RejectionHandler, Route}
 import akka.stream.ActorMaterializer
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
+import com.github.calvin.rest.dtos.OutgoingWeather._
 import com.github.calvin.rest.dtos.Validation._
 import com.github.calvin.rest.dtos._
 import com.github.calvin.services.members.MemberManager
-import com.github.calvin.services.weather.WeatherManager
+import com.github.calvin.services.weather.{Coordinate, WeatherManager}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import io.circe.generic.auto._
 
@@ -101,6 +102,49 @@ trait Routes extends JwtSupport with FailFastCirceSupport {
     }
   }
 
+  val protectedGetForecasts: Route = path("members" / "me" / "forecasts") {
+    get {
+      verifyToken { jwtUserData =>
+        onComplete(weatherManager.getForecastsByEmail(jwtUserData.email)) {
+          case Success(weatherDataList) => complete(weatherDataList.map(_.toWeatherResponse))
+          case Failure(cause) =>
+            println(cause)
+            complete(ServiceUnavailable, ErrorMessage("Unable to fetch data"))
+        }
+      }
+    }
+  }
+
+  val protectedPostForecastByLatLong: Route = path("members" / "me" / "forecasts") {
+    post {
+      verifyToken { jwtUserData =>
+        entity(as[Coordinate]) { coordinate =>
+          val result = weatherManager.addForecastByLatLong(jwtUserData.email, coordinate.lat, coordinate.lon)
+          onComplete(result) {
+            case Success(currentWeatherData) => complete(Created, currentWeatherData.toWeatherResponse)
+            case Failure(cause) =>
+              println(cause)
+              complete(ServiceUnavailable, ErrorMessage(s"Unable to add weather for ${jwtUserData.email}"))
+          }
+        }
+      }
+    }
+  }
+
+  val protectedDeleteForecastById: Route = path("members" / "me" / "forecasts" / LongNumber) { forecastId =>
+    delete {
+      verifyToken { jwtUserData =>
+        val result = weatherManager.removeForecastById(jwtUserData.email, forecastId)
+        onComplete(result) {
+          case Success(booleanResult) => complete("deleted")
+          case Failure(cause) =>
+            println(cause)
+            complete(ServiceUnavailable, ErrorMessage(s"Failed to remove weather for ${jwtUserData.email}"))
+        }
+      }
+    }
+  }
+
   import akka.http.scaladsl.model.HttpMethods._
 
   // Add CORS headers for rejected requests
@@ -109,7 +153,8 @@ trait Routes extends JwtSupport with FailFastCirceSupport {
   handleRejections(corsRejectionHandler) {
     cors(CorsSettings.defaultSettings.copy(allowedMethods = GET :: POST :: HEAD :: OPTIONS :: PUT :: DELETE :: Nil)) {
       handleRejections(RejectionHandler.default) {
-        authenticateEndpoint ~ signupMember ~ resetEndpoint ~ recoveryEndpoint
+        authenticateEndpoint ~ signupMember ~ resetEndpoint ~ recoveryEndpoint ~
+          protectedGetForecasts ~ protectedPostForecastByLatLong ~ protectedDeleteForecastById
       }
     }
   }

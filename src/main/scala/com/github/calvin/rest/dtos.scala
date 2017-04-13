@@ -1,5 +1,7 @@
 package com.github.calvin.rest
 
+import com.github.calvin.services.weather.{Coordinate, CurrentWeatherData}
+
 object dtos {
 
   case class IncomingMember(email: String, password: String)
@@ -17,6 +19,17 @@ object dtos {
   case class JwtUserData(email: String)
 
   case class AccessTokenWrapper(accessToken: String)
+
+  case class OutgoingWeather(description: Option[String], coordinates: Coordinate, id: Long, name: String,
+                             currentTemperature: Double, minimumTemperature: Double, maximumTemperature: Double, humidity: Double)
+
+  object OutgoingWeather {
+    implicit class CurrentWeatherDataOps(w: CurrentWeatherData) {
+      def toWeatherResponse: OutgoingWeather =
+        OutgoingWeather(w.weather.headOption.map(wd => wd.description), w.coord, w.id, w.name, w.main.temp, w.main.temp_min,
+          w.main.temp_max, w.main.humidity)
+    }
+  }
 
   object Validation {
     private val emailRegex = """^[a-zA-Z0-9\.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$""".r
