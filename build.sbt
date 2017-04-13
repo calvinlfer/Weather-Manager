@@ -26,6 +26,7 @@ libraryDependencies ++= {
     "de.heikoseeberger"                   %% "akka-http-circe"    % "1.14.0",
     "ch.megard"                           %% "akka-http-cors"     % "0.2.1",
     "org.scalatest"                       %% "scalatest"          % "3.0.1"   % "test",
-    "com.gu"                              %% "scanamo"            % "0.9.2"
+    "com.gu"                              %% "scanamo"            % "0.9.2",
+    "com.github.t3hnar"                   %% "scala-bcrypt"       % "3.0"
   )
 }
