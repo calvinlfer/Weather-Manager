@@ -129,4 +129,18 @@ You can also use the universal packager which is more geared for production depl
 sbt clean universal:packageBin 
 ```
 
-Navigate to `target/universal` and unzip `weather-manager-1.0.zip` and execute `./bin/weather-manager`
+Navigate to `target/universal` and unzip `weather-manager-1.0.zip` and execute `./bin/weather-manager` and ensure the following environment variables are present: 
+
+- FORECAST_TABLE: name of table to manage forecast data for users
+- MEMBER_TABLE: name of table to manage user authentication
+- PASSWORD_RESET_TABLE: name of table to handle password resets for users
+- SMTP_SERVER: domain of SMTP server (e.g. smtp.gmail.com)
+- SMTP_PORT: port of SMTP server
+- SENDER_EMAIL: email that is used to send password resets
+- SENDER_PASSWORD: password belonging to the email
+- JWT_SECRET: the secret used to encrypt JWT messages
+- JWT_EXPIRY: the time (in seconds) that the JWT token is valid for
+
+If you want to run this against local DynamoDB then ensure you have these system properties as well:
+
+`-Ddynamodb.aws-access-key-id=dev -Ddynamodb.aws-secret-access-key=dev -Ddynamodb.endpoint=http://localhost:8000`
