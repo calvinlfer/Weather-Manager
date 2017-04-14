@@ -24,7 +24,7 @@ It uses 3 DynamoDB tables:
 
 ### Table Creation
 
-If you are using local DynamoDB, hop on to the shell 
+If you are using [local DynamoDB](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html), hop on to the shell 
 (eg. if Local DynamoDB runs on port 8000, visit http://localhost:8000/shell) and execute the following commands to 
 configure the tables:
 
