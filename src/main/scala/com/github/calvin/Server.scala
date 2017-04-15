@@ -7,7 +7,7 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.github.calvin.actors.{Member => MemberActor}
 import com.github.calvin.configuration.DynamoDBClientProvider
-import com.github.calvin.repositories.interpreters.{DynamoForecastRepository, DynamoMemberRepository, DynamoPasswordResetRepository}
+import com.github.calvin.repositories.interpreters.{DynamoMemberRepository, DynamoPasswordResetRepository}
 import com.github.calvin.rest.Routes
 import com.github.calvin.services.members.MemberManager
 import com.github.calvin.services.members.interpreters.SimpleMemberManager

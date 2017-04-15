@@ -128,3 +128,5 @@ If you want to run this against local DynamoDB then ensure you have these system
 
 If you are using a local Cassandra, it is already setup to connect to it. If you are not, then change the contact points
 to point to your Cassandra cluster.
+
+Currently with this branch, you need to run through IntelliJ and add the system properties via the VM parameters
