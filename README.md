@@ -1,6 +1,6 @@
 # Weather manager
 
-A simple REST API that is meant to manage a set of weather related data for a user. 
+A REST API that is meant to manage a set of weather related data for a user. 
 
 ## Architecture
 
