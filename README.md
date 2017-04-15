@@ -13,55 +13,30 @@ Reset code via email is made possible by Courier. We rely on an existing SMTP co
 send out emails to users.
 
 #### Application
-The application uses Akka HTTP to serve HTTP requests and DynamoDB as the backing store. It also interacts with 
-OpenWeather in order to source weather information. ScalaCache + Caffeine is also used to cache OpenWeather queries for
-30 minutes to minimize latency and bandwidth.
+The application uses Akka HTTP to serve HTTP requests, Cassandra as the event journal to track member movements such as 
+adding and removing of weather data, tracking when a member has signed in or reset their password. For now, it uses
+DynamoDB to store authentication and password reset information. It also interacts with OpenWeather in order to source 
+weather information. ScalaCache + Caffeine is also used to cache OpenWeather queries for 30 minutes to minimize latency 
+and bandwidth. The plan is to eventually move everything over to Cassandra since it is well equipped to handle the 
+operational side. 
 
-It uses 3 DynamoDB tables: 
+It uses 2 DynamoDB tables: 
 - Member: responsible for member authentication (passwords are bcrypted and then stored)
-- Forecast: OpenWeather forecast weather ID data is stored for each user
 - Password Reset: Table that is used to facilitate password reset functionality
 
-### Table Creation
+It uses a Cassandra table as an event journal to track when a member adds or removes weather data and also when a 
+member logs in or resets their password. The idea behind doing this is to apply the principle of CQRS (Command Query
+Responsibility Segregation) wherein the Command Side is stored in a way that is optimal for the operational side and
+Query Side(s) is stored in a way that is optimal for the analytics side. The drawback of doing this is that the query
+side is now eventually consistent. Usually the command side is focused on a per-entity basis whereas the query sides are
+focused on answering questions that span multiple entities (e.g. How many members have added city with ID=1234 or 
+How many members have tried to login on 2017-04-15).
 
-If you are using [local DynamoDB](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html), hop on to the shell 
-(eg. if Local DynamoDB runs on port 8000, visit http://localhost:8000/shell) and execute the following commands to 
-configure the tables:
+### DynamoDB Table Creation
 
-Table to store forecast data
-```javascript
-var params = {
-    TableName: 'forecast',
-    KeySchema: [ // The type of of schema.  Must start with a HASH type, with an optional second RANGE.
-        { // Required HASH type attribute
-            AttributeName: 'username',
-            KeyType: 'HASH',
-        },
-        { // Optional RANGE key type for HASH + RANGE tables
-            AttributeName: 'id', 
-            KeyType: 'RANGE', 
-        }
-    ],
-    AttributeDefinitions: [ // The names and types of all primary and index key attributes only
-        {
-            AttributeName: 'username',
-            AttributeType: 'S', // (S | N | B) for string, number, binary
-        },
-        {
-            AttributeName: 'id',
-            AttributeType: 'N', // (S | N | B) for string, number, binary
-        }
-    ],
-    ProvisionedThroughput: { // required provisioned throughput for the table
-        ReadCapacityUnits: 1, 
-        WriteCapacityUnits: 1, 
-    }
-};
-dynamodb.createTable(params, function(err, data) {
-    if (err) ppJson(err); // an error occurred
-    else ppJson(data); // successful response
-});
-```
+If you are using [local DynamoDB](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html), 
+hop on to the shell (eg. if Local DynamoDB runs on port 8000, visit http://localhost:8000/shell) and execute the 
+following commands to configure the tables:
 
 Table to store member data
 ```javascript
@@ -70,18 +45,18 @@ var params = {
     KeySchema: [ // The type of of schema.  Must start with a HASH type, with an optional second RANGE.
         { // Required HASH type attribute
             AttributeName: 'email',
-            KeyType: 'HASH',
+            KeyType: 'HASH'
         }
     ],
     AttributeDefinitions: [ // The names and types of all primary and index key attributes only
         {
             AttributeName: 'email',
-            AttributeType: 'S', // (S | N | B) for string, number, binary
+            AttributeType: 'S' // (S | N | B) for string, number, binary
         }
     ],
     ProvisionedThroughput: { // required provisioned throughput for the table
         ReadCapacityUnits: 1, 
-        WriteCapacityUnits: 1, 
+        WriteCapacityUnits: 1 
     }
 };
 dynamodb.createTable(params, function(err, data) {
@@ -97,18 +72,18 @@ var params = {
     KeySchema: [ // The type of of schema.  Must start with a HASH type, with an optional second RANGE.
         { // Required HASH type attribute
             AttributeName: 'resetCode',
-            KeyType: 'HASH',
+            KeyType: 'HASH'
         }
     ],
     AttributeDefinitions: [ // The names and types of all primary and index key attributes only
         {
             AttributeName: 'resetCode',
-            AttributeType: 'S', // (S | N | B) for string, number, binary
+            AttributeType: 'S' // (S | N | B) for string, number, binary
         }
     ],
     ProvisionedThroughput: { // required provisioned throughput for the table
         ReadCapacityUnits: 1, 
-        WriteCapacityUnits: 1, 
+        WriteCapacityUnits: 1 
     }
 };
 dynamodb.createTable(params, function(err, data) {
@@ -116,6 +91,11 @@ dynamodb.createTable(params, function(err, data) {
     else ppJson(data); // successful response
 });
 ```
+
+### Cassandra Table Creation
+Akka Persistence Cassandra takes care of creating the tables by default. Be warned that it uses some questionable 
+defaults so you definitely do not want to use these defaults in production. You want a Replication Factor greater than 1
+along with a read and write consistency of quorum or any other configuration that yields consistent results. 
 
 ## Running the application
 The easiest way to run the application is using `sbt run`, if you want to run this against local DynamoDB then run:
@@ -129,9 +109,9 @@ You can also use the universal packager which is more geared for production depl
 sbt clean universal:packageBin 
 ```
 
-Navigate to `target/universal` and unzip `weather-manager-1.0.zip` and execute `./bin/weather-manager` and ensure the following environment variables are present: 
+Navigate to `target/universal` and unzip `weather-manager-1.0.zip` and execute `./bin/weather-manager` and ensure the 
+following environment variables are present: 
 
-- FORECAST_TABLE: name of table to manage forecast data for users
 - MEMBER_TABLE: name of table to manage user authentication
 - PASSWORD_RESET_TABLE: name of table to handle password resets for users
 - SMTP_SERVER: domain of SMTP server (e.g. smtp.gmail.com)
@@ -144,3 +124,6 @@ Navigate to `target/universal` and unzip `weather-manager-1.0.zip` and execute `
 If you want to run this against local DynamoDB then ensure you have these system properties as well:
 
 `-Ddynamodb.aws-access-key-id=dev -Ddynamodb.aws-secret-access-key=dev -Ddynamodb.endpoint=http://localhost:8000`
+
+If you are using a local Cassandra, it is already setup to connect to it. If you are not, then change the contact points
+to point to your Cassandra cluster.
