@@ -30,7 +30,8 @@ Responsibility Segregation) wherein the Command Side is stored in a way that is 
 Query Side(s) is stored in a way that is optimal for the analytics side. The drawback of doing this is that the query
 side is now eventually consistent. Usually the command side is focused on a per-entity basis whereas the query sides are
 focused on answering questions that span multiple entities (e.g. How many members have added city with ID=1234 or 
-How many members have tried to login on 2017-04-15).
+How many members have tried to login on 2017-04-15). Currently, the Persistence Query Example feeds off the raw events 
+from the command side but does not feed those events to any read-side databases optimized to answer specific questions.
 
 ### DynamoDB Table Creation
 
