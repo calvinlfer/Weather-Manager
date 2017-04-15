@@ -43,7 +43,6 @@ object Server extends App with Routes {
     .as(config.getString("email.sender-email"), config.getString("email.password"))
     .startTtls(true)()
 
-  val forecastRepo = new DynamoForecastRepository(dynamoClient, config)
   val memberRepo = new DynamoMemberRepository(dynamoClient, config)
   val pwResetRepo = new DynamoPasswordResetRepository(dynamoClient, config)
   implicit val weatherManagerAskTimeout = Timeout(5.seconds)
