@@ -5,22 +5,19 @@ import akka.persistence.cassandra.query.scaladsl.CassandraReadJournal
 import akka.persistence.query.PersistenceQuery
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
-import com.typesafe.config.ConfigFactory
+import com.github.calvin.actors.Member.{Event => MemberEvent}
+import com.typesafe.config.{Config, ConfigFactory}
 
 class PersistenceQueryExample {
-  val config = ConfigFactory.load("query")
+  val config: Config = ConfigFactory.load("query")
   implicit val actorSystem: ActorSystem = ActorSystem("weather-manager", config)
   implicit val materializer = ActorMaterializer()
   // Read journal
-  val readJournal = PersistenceQuery(actorSystem).readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
-  val log = (x: String) => {
-    println(x)
-    x
-  }
+  val readJournal: CassandraReadJournal = PersistenceQuery(actorSystem).readJournalFor[CassandraReadJournal](CassandraReadJournal.Identifier)
 
   readJournal.persistenceIds()
-    .map(log)
     .flatMapMerge(Int.MaxValue, persistentId => readJournal.eventsByPersistenceId(persistentId, 0, Long.MaxValue))
+    .filter(e => e.event.isInstanceOf[MemberEvent])
     .map(eventEnvelope => (eventEnvelope.persistenceId, eventEnvelope.event))
     .runWith(Sink.foreach(println))
 }

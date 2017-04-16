@@ -1,10 +1,13 @@
 package com.github.calvin.rest
 
+import akka.actor.{ActorRef, Props}
+import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
 import akka.http.scaladsl.model.ContentTypes._
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.stream.ActorMaterializer
+import com.github.calvin.actors.Member
 import com.github.calvin.mocks.{InMemoryForecastRepository, InMemoryMemberRepository, InMemoryPasswordRepository, SampleWeather}
 import com.github.calvin.rest.dtos.OutgoingWeather._
 import com.github.calvin.rest.dtos.{AccessTokenWrapper, IncomingMember, OutgoingWeather}
@@ -12,6 +15,7 @@ import com.github.calvin.services.members.MemberManager
 import com.github.calvin.services.members.interpreters.SimpleMemberManager
 import com.github.calvin.services.weather._
 import com.github.calvin.services.weather.interpreters.SimpleWeatherManager
+import com.typesafe.config.Config
 import courier.Mailer
 import io.circe.generic.auto._
 import org.scalatest.{FunSpec, MustMatchers}
@@ -30,6 +34,15 @@ class RouteSpec extends FunSpec with MustMatchers with Routes with ScalatestRout
   override implicit val mat: ActorMaterializer = this.materializer
   override val ec: ExecutionContext = this.executor
 
+  val config: Config = system.settings.config
+  val userShardRegion: ActorRef = ClusterSharding(system).start(
+    typeName = Member.Sharding.shardName,
+    entityProps = Props[Member],
+    settings = ClusterShardingSettings(system),
+    extractEntityId = Member.Sharding.extractEntityId,
+    extractShardId = Member.Sharding.shardIdExtractor(config.getInt("members.sharding.number-of-shards"))
+  )
+
   val weather = new SampleWeather(exampleWeatherData :: Nil)
   val forecastRepo = new InMemoryForecastRepository()
   override val weatherManager: WeatherManager = new SimpleWeatherManager(weather, forecastRepo)(ec)
@@ -37,7 +50,7 @@ class RouteSpec extends FunSpec with MustMatchers with Routes with ScalatestRout
   val memberRepo = new InMemoryMemberRepository()
   val pwResetRepo = new InMemoryPasswordRepository()
   val testMailer: Mailer = Mailer("localhost", 25)()
-  override val memberManager: MemberManager = new SimpleMemberManager(memberRepo, pwResetRepo, testMailer)(ec)
+  override val memberManager: MemberManager = new SimpleMemberManager(memberRepo, pwResetRepo, userShardRegion, testMailer)(ec)
 
   override val secretKey: String = "super-secret"
   override val tokenDurationSeconds: Int = 36000

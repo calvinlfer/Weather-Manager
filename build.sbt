@@ -29,6 +29,7 @@ libraryDependencies ++= {
     akka                        %% "akka-cluster"               % akkaV,
     akka                        %% "akka-cluster-sharding"      % akkaV,
     akka                        %% "akka-distributed-data"      % akkaV,
+    akka                        %% "akka-testkit"               % akkaV,
     akka                        %% "akka-http"                  % akkaHttpV,
     akka                        %% "akka-http-testkit"          % akkaHttpV,
     akka                        %% "akka-persistence-cassandra" % "0.50",
