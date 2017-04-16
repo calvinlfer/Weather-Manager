@@ -118,10 +118,11 @@ dynamodb.createTable(params, function(err, data) {
 ```
 
 ## Running the application
-The easiest way to run the application is using `sbt run`, if you want to run this against local DynamoDB then run:
+The easiest way to run the application is using IntellIJ, if you want to run this against local DynamoDB then add the 
+following to the VM properties in the Run Configuration:
 
 ```sbtshell
-sbt -Dsecrets.jwt-key=examplesecretgoes here -Ddynamodb.aws-access-key-id=dev -Ddynamodb.aws-secret-access-key=dev -Ddynamodb.endpoint=http://localhost:8000 -Demail.sender-email=youremail@gmail.com -Demail.password=yourpassword -Dopenweather.api-key=youropenweatherapikey run
+-Dsecrets.jwt-key=examplesecretgoes here -Ddynamodb.aws-access-key-id=dev -Ddynamodb.aws-secret-access-key=dev -Ddynamodb.endpoint=http://localhost:8000 -Demail.sender-email=youremail@gmail.com -Demail.password=yourpassword -Dopenweather.api-key=youropenweatherapikey
 ```
 
 You can also use the universal packager which is more geared for production deployment
@@ -144,3 +145,8 @@ Navigate to `target/universal` and unzip `weather-manager-1.0.zip` and execute `
 If you want to run this against local DynamoDB then ensure you have these system properties as well:
 
 `-Ddynamodb.aws-access-key-id=dev -Ddynamodb.aws-secret-access-key=dev -Ddynamodb.endpoint=http://localhost:8000`
+
+You can also use the system properties mentioned above as an alternative to environment variables. For example:
+```bash
+./bin/weather-manager -Dsecrets.jwt-key=examplesecretgoes here -Ddynamodb.aws-access-key-id=dev -Ddynamodb.aws-secret-access-key=dev -Ddynamodb.endpoint=http://localhost:8000 -Demail.sender-email=youremail@gmail.com -Demail.password=yourpassword -Dopenweather.api-key=youropenweatherapikey
+```
