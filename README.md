@@ -99,13 +99,7 @@ defaults so you definitely do not want to use these defaults in production. You 
 along with a read and write consistency of quorum or any other configuration that yields consistent results. 
 
 ## Running the application
-The easiest way to run the application is using `sbt run`, if you want to run this against local DynamoDB then run:
-
-```sbtshell
-sbt -Dsecrets.jwt-key=examplesecretgoes here -Ddynamodb.aws-access-key-id=dev -Ddynamodb.aws-secret-access-key=dev -Ddynamodb.endpoint=http://localhost:8000 -Demail.sender-email=youremail@gmail.com -Demail.password=yourpassword -Dopenweather.api-key=youropenweatherapikey run
-```
-
-You can also use the universal packager which is more geared for production deployment
+Execute the universal packager and have it build the application
 ```sbtshell
 sbt clean universal:packageBin 
 ```
@@ -129,4 +123,14 @@ If you want to run this against local DynamoDB then ensure you have these system
 If you are using a local Cassandra, it is already setup to connect to it. If you are not, then change the contact points
 to point to your Cassandra cluster.
 
-Currently with this branch, you need to run through IntelliJ and add the system properties via the VM parameters
+If you prefer to use system properties:
+
+For the command side
+```bash
+./bin/weather-manager -Ddynamodb.aws-access-key-id=dev -Ddynamodb.aws-secret-access-key=dev -Ddynamodb.endpoint=http://localhost:8000 -Demail.sender-email=youremail -Demail.password=yourpassword -Dopenweather.api-key=yourapikey command
+```
+
+For the query side
+```bash
+./bin/weather-manager query
+```

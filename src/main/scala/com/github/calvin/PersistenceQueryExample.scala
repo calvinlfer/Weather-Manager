@@ -7,7 +7,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import com.typesafe.config.ConfigFactory
 
-object PersistenceQueryExample extends App {
+class PersistenceQueryExample {
   val config = ConfigFactory.load("query")
   implicit val actorSystem: ActorSystem = ActorSystem("weather-manager", config)
   implicit val materializer = ActorMaterializer()

@@ -19,7 +19,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
-object Server extends App with Routes {
+class Server extends Routes {
   override implicit val system: ActorSystem = ActorSystem("weather-manager")
   override implicit val mat: ActorMaterializer = ActorMaterializer()
   override implicit val ec: ExecutionContext = system.dispatcher
