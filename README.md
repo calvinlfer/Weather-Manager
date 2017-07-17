@@ -33,6 +33,8 @@ focused on answering questions that span multiple entities (e.g. How many member
 How many members have tried to login on 2017-04-15). Currently, the Persistence Query Example feeds off the raw events 
 from the command side but does not feed those events to any read-side databases optimized to answer specific questions.
 
+**Note**: The Query side does not produce an optimal `Source` as you will end up having a potentially large and ever increasing amount of streams materialized in memory (one for each Member). A better way to do this is to tag the persisted Events and use `eventsByTag` instead.
+
 ### DynamoDB Table Creation
 
 If you are using [local DynamoDB](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html), 
